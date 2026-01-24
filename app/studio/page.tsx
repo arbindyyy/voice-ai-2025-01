@@ -27,6 +27,8 @@ export default function StudioPage() {
     const [pitch, setPitch] = useState(1);
     const [showSettings, setShowSettings] = useState(false);
     const [filteredVoices, setFilteredVoices] = useState<Voice[]>([]);
+    const [showDownloadMenu, setShowDownloadMenu] = useState(false);
+    const [isDownloading, setIsDownloading] = useState(false);
 
     useEffect(() => {
         const filtered = getVoicesByLanguage(language);
@@ -68,13 +70,15 @@ export default function StudioPage() {
         }
     };
 
-    const handleDownload = async () => {
+    const handleDownload = async (format: 'webm' | 'wav' | 'mp3' = 'webm') => {
         if (!text.trim()) {
             alert("Please enter some text first!");
             return;
         }
 
         const tts = getTTSEngine();
+        setIsDownloading(true);
+        setShowDownloadMenu(false);
 
         try {
             setIsPlaying(true);
@@ -90,23 +94,96 @@ export default function StudioPage() {
                 },
             });
 
+            let finalBlob = audioBlob;
+            let extension = 'webm';
+
+            // Convert to WAV if requested
+            if (format === 'wav' || format === 'mp3') {
+                try {
+                    const audioContext = new AudioContext();
+                    const arrayBuffer = await audioBlob.arrayBuffer();
+                    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                    finalBlob = await audioBufferToWav(audioBuffer);
+                    extension = 'wav';
+                } catch (conversionError) {
+                    console.error('Conversion error:', conversionError);
+                    alert(`Could not convert to ${format.toUpperCase()}. Downloading as WebM instead.`);
+                    extension = 'webm';
+                }
+            }
+
             // Download the audio file
-            const url = URL.createObjectURL(audioBlob);
+            const url = URL.createObjectURL(finalBlob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = `voice-${selectedVoice.name}-${Date.now()}.webm`;
+            a.download = `voice-${selectedVoice.name}-${Date.now()}.${extension}`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
 
             setIsPlaying(false);
+            setIsDownloading(false);
 
         } catch (error) {
             console.error("Download Error:", error);
             setIsPlaying(false);
+            setIsDownloading(false);
             alert("Error downloading audio. Please try again.");
         }
+    };
+
+    // Helper function to convert AudioBuffer to WAV
+    const audioBufferToWav = (audioBuffer: AudioBuffer): Promise<Blob> => {
+        return new Promise((resolve) => {
+            const numberOfChannels = audioBuffer.numberOfChannels;
+            const length = audioBuffer.length * numberOfChannels * 2;
+            const buffer = new ArrayBuffer(44 + length);
+            const view = new DataView(buffer);
+            const channels: Float32Array[] = [];
+            let offset = 0;
+            let pos = 0;
+
+            const setUint16 = (data: number) => {
+                view.setUint16(pos, data, true);
+                pos += 2;
+            };
+            const setUint32 = (data: number) => {
+                view.setUint32(pos, data, true);
+                pos += 4;
+            };
+
+            // WAV header
+            setUint32(0x46464952);
+            setUint32(36 + length);
+            setUint32(0x45564157);
+            setUint32(0x20746d66);
+            setUint32(16);
+            setUint16(1);
+            setUint16(numberOfChannels);
+            setUint32(audioBuffer.sampleRate);
+            setUint32(audioBuffer.sampleRate * numberOfChannels * 2);
+            setUint16(numberOfChannels * 2);
+            setUint16(16);
+            setUint32(0x61746164);
+            setUint32(length);
+
+            for (let i = 0; i < audioBuffer.numberOfChannels; i++) {
+                channels.push(audioBuffer.getChannelData(i));
+            }
+
+            while (pos < buffer.byteLength) {
+                for (let i = 0; i < numberOfChannels; i++) {
+                    let sample = Math.max(-1, Math.min(1, channels[i][offset]));
+                    sample = sample < 0 ? sample * 0x8000 : sample * 0x7fff;
+                    view.setInt16(pos, sample, true);
+                    pos += 2;
+                }
+                offset++;
+            }
+
+            resolve(new Blob([buffer], { type: "audio/wav" }));
+        });
     };
 
     const characterCount = text.length;
@@ -298,14 +375,39 @@ export default function StudioPage() {
                                         </button>
                                     </div>
 
-                                    <button
-                                        onClick={handleDownload}
-                                        disabled={!text.trim() || isPlaying}
-                                        className="w-full button-primary flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        <Sparkles className="w-5 h-5" />
-                                        <span>Generate & Download Audio</span>
-                                    </button>
+                                    <div className="relative">
+                                        <button
+                                            onClick={() => setShowDownloadMenu(!showDownloadMenu)}
+                                            disabled={!text.trim() || isPlaying || isDownloading}
+                                            className="w-full button-primary flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            <Download className="w-5 h-5" />
+                                            <span>{isDownloading ? "Downloading..." : "Generate & Download"}</span>
+                                        </button>
+
+                                        {showDownloadMenu && (
+                                            <div className="absolute bottom-full left-0 mb-2 w-full glass rounded-xl p-2 space-y-1 z-10">
+                                                <button
+                                                    onClick={() => handleDownload('webm')}
+                                                    className="w-full px-3 py-2 text-sm hover:bg-white/10 rounded-lg text-left"
+                                                >
+                                                    WebM (Default)
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDownload('wav')}
+                                                    className="w-full px-3 py-2 text-sm hover:bg-white/10 rounded-lg text-left"
+                                                >
+                                                    WAV (High Quality)
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDownload('mp3')}
+                                                    className="w-full px-3 py-2 text-sm hover:bg-white/10 rounded-lg text-left"
+                                                >
+                                                    MP3 (Compatible)
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
