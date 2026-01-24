@@ -17,7 +17,6 @@ import {
 import { voices, Voice, getVoicesByLanguage } from "@/lib/voice-config";
 import { getTTSEngine } from "@/lib/tts-engine";
 import { downloadAudio } from "@/lib/audio-utils";
-import AudioEditorComponent from "@/components/AudioEditor";
 
 export default function StudioPage() {
     const [text, setText] = useState("");
@@ -28,8 +27,6 @@ export default function StudioPage() {
     const [pitch, setPitch] = useState(1);
     const [showSettings, setShowSettings] = useState(false);
     const [filteredVoices, setFilteredVoices] = useState<Voice[]>([]);
-    const [generatedAudio, setGeneratedAudio] = useState<Blob | null>(null);
-    const [showEditor, setShowEditor] = useState(false);
 
     useEffect(() => {
         const filtered = getVoicesByLanguage(language);
@@ -60,8 +57,7 @@ export default function StudioPage() {
                 rate: speed,
                 pitch: pitch,
                 onEnd: () => setIsPlaying(false),
-                onError: (error) => {
-                    console.error("TTS Error:", error);
+                onError: () => {
                     setIsPlaying(false);
                     alert("Error playing audio. Please try again.");
                 },
@@ -88,8 +84,7 @@ export default function StudioPage() {
                 rate: speed,
                 pitch: pitch,
                 onEnd: () => setIsPlaying(false),
-                onError: (error) => {
-                    console.error("Recording Error:", error);
+                onError: () => {
                     setIsPlaying(false);
                     alert("Error recording audio. Please try again.");
                 },
@@ -111,40 +106,6 @@ export default function StudioPage() {
             console.error("Download Error:", error);
             setIsPlaying(false);
             alert("Error downloading audio. Please try again.");
-        }
-    };
-
-    const handleGenerateAndEdit = async () => {
-        if (!text.trim()) {
-            alert("Please enter some text first!");
-            return;
-        }
-
-        const tts = getTTSEngine();
-
-        try {
-            setIsPlaying(true);
-
-            // Record and generate audio
-            const audioBlob = await tts.speakAndRecord(text, selectedVoice, {
-                rate: speed,
-                pitch: pitch,
-                onEnd: () => setIsPlaying(false),
-                onError: (error) => {
-                    console.error("Recording Error:", error);
-                    setIsPlaying(false);
-                    alert("Error recording audio. Please try again.");
-                },
-            });
-
-            setGeneratedAudio(audioBlob);
-            setShowEditor(true);
-            setIsPlaying(false);
-
-        } catch (error) {
-            console.error("Generation Error:", error);
-            setIsPlaying(false);
-            alert("Error generating audio. Please try again.");
         }
     };
 
@@ -338,12 +299,12 @@ export default function StudioPage() {
                                     </div>
 
                                     <button
-                                        onClick={handleGenerateAndEdit}
+                                        onClick={handleDownload}
                                         disabled={!text.trim() || isPlaying}
                                         className="w-full button-primary flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         <Sparkles className="w-5 h-5" />
-                                        <span>Generate & Edit Audio</span>
+                                        <span>Generate & Download Audio</span>
                                     </button>
                                 </div>
                             </div>
@@ -398,16 +359,6 @@ export default function StudioPage() {
                         </div>
                     </div>
 
-                    {/* Audio Editor */}
-                    {showEditor && generatedAudio && (
-                        <div className="mt-8">
-                            <AudioEditorComponent
-                                audioBlob={generatedAudio}
-                                filename={`voice-${selectedVoice.name}-${Date.now()}`}
-                                onClose={() => setShowEditor(false)}
-                            />
-                        </div>
-                    )}
                 </motion.div>
             </div>
         </div>
