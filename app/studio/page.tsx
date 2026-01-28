@@ -123,7 +123,8 @@ export default function StudioPage() {
                     const audioContext = new AudioContext();
                     const arrayBuffer = await audioBlob.arrayBuffer();
                     const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-                    finalBlob = await audioBufferToWav(audioBuffer);
+                    const resampledBuffer = await resampleAudioBuffer(audioBuffer, 48000);
+                    finalBlob = await audioBufferToWav(resampledBuffer);
                     extension = 'wav';
                 } catch (conversionError) {
                     console.error('Conversion error:', conversionError);
@@ -151,6 +152,19 @@ export default function StudioPage() {
             setIsDownloading(false);
             alert("Error downloading audio. Please try again.");
         }
+    };
+
+    const resampleAudioBuffer = async (audioBuffer: AudioBuffer, targetSampleRate: number): Promise<AudioBuffer> => {
+        if (audioBuffer.sampleRate === targetSampleRate) {
+            return audioBuffer;
+        }
+        const length = Math.ceil(audioBuffer.duration * targetSampleRate);
+        const offline = new OfflineAudioContext(audioBuffer.numberOfChannels, length, targetSampleRate);
+        const source = offline.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(offline.destination);
+        source.start(0);
+        return await offline.startRendering();
     };
 
     // Helper function to convert AudioBuffer to WAV

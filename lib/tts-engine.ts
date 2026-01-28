@@ -38,7 +38,7 @@ export class TTSEngine {
         this.mediaStreamDestination = this.audioContext.createMediaStreamDestination();
         this.mediaRecorder = new MediaRecorder(this.mediaStreamDestination.stream, {
             mimeType: 'audio/webm;codecs=opus',
-            audioBitsPerSecond: 128000,
+            audioBitsPerSecond: 256000,
         });
         this.audioChunks = [];
         this.mediaRecorder.ondataavailable = (event) => {

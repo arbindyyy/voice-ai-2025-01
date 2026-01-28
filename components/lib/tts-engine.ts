@@ -46,7 +46,7 @@ export class TTSEngine {
         // Create media recorder
         this.mediaRecorder = new MediaRecorder(this.mediaStreamDestination.stream, {
             mimeType: 'audio/webm;codecs=opus',
-            audioBitsPerSecond: 128000, // High quality
+            audioBitsPerSecond: 256000, // Higher quality
         });
 
         this.audioChunks = [];
