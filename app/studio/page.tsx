@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -14,7 +14,7 @@ import {
     Sparkles,
     Languages
 } from "lucide-react";
-import { voices, Voice, getVoicesByLanguage } from "@/lib/voice-config";
+import { voices, Voice } from "@/lib/voice-config";
 import { getTTSEngine } from "@/lib/tts-engine";
 import { downloadAudio } from "@/lib/audio-utils";
 
@@ -27,16 +27,31 @@ export default function StudioPage() {
     const [pitch, setPitch] = useState(1);
     const [showSettings, setShowSettings] = useState(false);
     const [filteredVoices, setFilteredVoices] = useState<Voice[]>([]);
+    const [customVoices, setCustomVoices] = useState<Voice[]>([]);
     const [showDownloadMenu, setShowDownloadMenu] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
 
+    const allVoices = useMemo(() => [...customVoices, ...voices], [customVoices]);
+
     useEffect(() => {
-        const filtered = getVoicesByLanguage(language);
+        try {
+            const stored = localStorage.getItem("voiceCreator.customVoices");
+            const parsed = stored ? (JSON.parse(stored) as Voice[]) : [];
+            if (Array.isArray(parsed)) {
+                setCustomVoices(parsed);
+            }
+        } catch (error) {
+            console.error("Failed to load custom voices", error);
+        }
+    }, []);
+
+    useEffect(() => {
+        const filtered = allVoices.filter((v) => v.language === language || v.language === "both");
         setFilteredVoices(filtered);
         if (filtered.length > 0 && selectedVoice.language !== language && selectedVoice.language !== "both") {
             setSelectedVoice(filtered[0]);
         }
-    }, [language, selectedVoice]);
+    }, [language, selectedVoice, allVoices]);
 
     const handleSpeak = async () => {
         if (!text.trim()) {
@@ -434,6 +449,11 @@ export default function StudioPage() {
                                                 <div>
                                                     <h4 className="font-semibold text-lg">{voice.name}</h4>
                                                     <div className="flex items-center space-x-2 mt-1">
+                                                        {voice.isCustom && (
+                                                            <span className="text-xs px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-300">
+                                                                Custom
+                                                            </span>
+                                                        )}
                                                         <span className="text-xs px-2 py-1 rounded-full bg-white/10">
                                                             {voice.gender}
                                                         </span>

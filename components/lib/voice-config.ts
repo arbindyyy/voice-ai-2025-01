@@ -14,6 +14,7 @@ export interface Voice {
     webSpeechVoice?: string; // Maps to browser's SpeechSynthesis voice
     pitch?: number;
     rate?: number;
+    isCustom?: boolean;
 }
 
 export const voices: Voice[] = [

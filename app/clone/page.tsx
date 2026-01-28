@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -15,6 +15,7 @@ import {
     Loader2,
 } from "lucide-react";
 import { validateAudioFile, getAudioDuration, formatDuration } from "@/lib/audio-utils";
+import { Voice } from "@/lib/voice-config";
 
 interface UploadedFile {
     file: File;
@@ -27,10 +28,22 @@ export default function ClonePage() {
     const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
     const [voiceName, setVoiceName] = useState("");
     const [voiceDescription, setVoiceDescription] = useState("");
+    const [voiceLanguage, setVoiceLanguage] = useState<"en" | "hi">("en");
+    const [voiceGender, setVoiceGender] = useState<"male" | "female">("female");
     const [isTraining, setIsTraining] = useState(false);
     const [trainingProgress, setTrainingProgress] = useState(0);
     const [isComplete, setIsComplete] = useState(false);
     const [dragActive, setDragActive] = useState(false);
+
+    const customVoiceKey = "voiceCreator.customVoices";
+
+    const sampleText = useMemo(
+        () => ({
+            en: "Hello, this is my custom voice.",
+            hi: "नमस्ते, यह मेरी कस्टम आवाज़ है।",
+        }),
+        []
+    );
 
     const handleDrag = (e: React.DragEvent) => {
         e.preventDefault();
@@ -110,6 +123,28 @@ export default function ClonePage() {
                     clearInterval(interval);
                     setIsTraining(false);
                     setIsComplete(true);
+                    const newVoice: Voice = {
+                        id: `custom-${Date.now()}`,
+                        name: voiceName.trim(),
+                        language: voiceLanguage,
+                        gender: voiceGender,
+                        age: "middle",
+                        style: "natural",
+                        description: voiceDescription.trim() || "Custom cloned voice",
+                        sampleText,
+                        webSpeechVoice: voiceLanguage === "hi" ? "Google हिन्दी" : "Google US English",
+                        pitch: 1,
+                        rate: 1,
+                        isCustom: true,
+                    };
+
+                    try {
+                        const existing = localStorage.getItem(customVoiceKey);
+                        const parsed = existing ? (JSON.parse(existing) as Voice[]) : [];
+                        localStorage.setItem(customVoiceKey, JSON.stringify([newVoice, ...parsed]));
+                    } catch (error) {
+                        console.error("Failed to save custom voice", error);
+                    }
                     return 100;
                 }
                 return prev + 2;
@@ -305,6 +340,54 @@ export default function ClonePage() {
                                 </div>
 
                                 <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">Language *</label>
+                                        <div className="flex space-x-3">
+                                            <button
+                                                onClick={() => setVoiceLanguage("en")}
+                                                className={`flex-1 py-3 rounded-xl font-semibold transition-all ${voiceLanguage === "en"
+                                                    ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white"
+                                                    : "glass hover:bg-white/10"
+                                                    }`}
+                                            >
+                                                English
+                                            </button>
+                                            <button
+                                                onClick={() => setVoiceLanguage("hi")}
+                                                className={`flex-1 py-3 rounded-xl font-semibold transition-all ${voiceLanguage === "hi"
+                                                    ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white"
+                                                    : "glass hover:bg-white/10"
+                                                    }`}
+                                            >
+                                                Hindi
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">Gender *</label>
+                                        <div className="flex space-x-3">
+                                            <button
+                                                onClick={() => setVoiceGender("female")}
+                                                className={`flex-1 py-3 rounded-xl font-semibold transition-all ${voiceGender === "female"
+                                                    ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white"
+                                                    : "glass hover:bg-white/10"
+                                                    }`}
+                                            >
+                                                Female
+                                            </button>
+                                            <button
+                                                onClick={() => setVoiceGender("male")}
+                                                className={`flex-1 py-3 rounded-xl font-semibold transition-all ${voiceGender === "male"
+                                                    ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white"
+                                                    : "glass hover:bg-white/10"
+                                                    }`}
+                                            >
+                                                Male
+                                            </button>
+                                        </div>
+                                    </div>
+
                                     <div>
                                         <label className="block text-sm font-medium mb-2">
                                             Voice Name *
