@@ -58,6 +58,54 @@ export class TTSEngine {
         };
     }
 
+    private detectEmotion(text: string): { type: string; intensity: number } {
+        const exclamations = (text.match(/!/g) || []).length;
+        const questions = (text.match(/\?/g) || []).length;
+        const allCaps = (text.match(/\b[A-Z]{2,}\b/g) || []).length;
+        const emotionalWords = /\b(amazing|wonderful|great|excellent|beautiful|love|happy|sad|angry|excited|wow|awesome|fantastic|incredible)\b/gi;
+        const emotionalMatches = (text.match(emotionalWords) || []).length;
+
+        if (exclamations > 1 || allCaps > 0 || emotionalMatches > 2) {
+            return { type: "excited", intensity: Math.min(exclamations + allCaps + emotionalMatches, 5) };
+        }
+        if (questions > 1) {
+            return { type: "curious", intensity: questions };
+        }
+        if (exclamations === 1 || emotionalMatches > 0) {
+            return { type: "expressive", intensity: 2 };
+        }
+        return { type: "neutral", intensity: 1 };
+    }
+
+    private addEmotionalProsody(text: string): string {
+        let processed = text;
+
+        processed = processed.replace(/\b([A-Z]{2,})\b/g, (match) => {
+            return match.charAt(0) + match.slice(1).toLowerCase() + "!";
+        });
+
+        processed = processed.replace(/([^!])!+/g, "$1 !");
+        processed = processed.replace(/([^?])\?+/g, "$1 ?");
+
+        processed = processed.replace(/\b(amazing|wonderful|great|excellent|beautiful|important|critical)\b/gi, (match) => ` ${match} `);
+
+        return processed;
+    }
+
+    private processTextForNaturalSpeech(text: string): string {
+        let processed = this.addEmotionalProsody(text);
+
+        processed = processed.replace(/([.!?])\s+/g, "$1  ");
+        processed = processed.replace(/,\s+/g, ",  ");
+        processed = processed.replace(/;\s+/g, ";  ");
+        processed = processed.replace(/:\s+/g, ":  ");
+
+        processed = processed.replace(/\b(\d+)\b/g, " $1 ");
+        processed = processed.replace(/\b(and|but|or|so)\b/g, " $1 ");
+
+        return processed.trim().replace(/\s+/g, " ");
+    }
+
     public async speak(
         text: string,
         voice: Voice,
@@ -79,7 +127,9 @@ export class TTSEngine {
             // Cancel any ongoing speech
             this.synth.cancel();
 
-            this.utterance = new SpeechSynthesisUtterance(text);
+            const emotion = this.detectEmotion(text);
+            const processedText = this.processTextForNaturalSpeech(text);
+            this.utterance = new SpeechSynthesisUtterance(processedText);
 
             // Find matching voice
             const matchingVoice = this.findMatchingVoice(voice);
@@ -87,9 +137,35 @@ export class TTSEngine {
                 this.utterance.voice = matchingVoice;
             }
 
-            // Set voice parameters
-            this.utterance.rate = options?.rate ?? voice.rate ?? 1;
-            this.utterance.pitch = options?.pitch ?? voice.pitch ?? 1;
+            const baseRate = options?.rate ?? voice.rate ?? 1;
+            const basePitch = options?.pitch ?? voice.pitch ?? 1;
+
+            let emotionalRateMod = 1.0;
+            let emotionalPitchMod = 1.0;
+
+            switch (emotion.type) {
+                case "excited":
+                    emotionalRateMod = 1.08 + emotion.intensity * 0.02;
+                    emotionalPitchMod = 1.1 + emotion.intensity * 0.02;
+                    break;
+                case "curious":
+                    emotionalRateMod = 0.98;
+                    emotionalPitchMod = 1.08;
+                    break;
+                case "expressive":
+                    emotionalRateMod = 1.03;
+                    emotionalPitchMod = 1.05;
+                    break;
+                default:
+                    emotionalRateMod = 1.0;
+                    emotionalPitchMod = 1.0;
+            }
+
+            const rateVariation = 1 + (Math.random() * 0.06 - 0.03);
+            const pitchVariation = 1 + (Math.random() * 0.04 - 0.02);
+
+            this.utterance.rate = Math.max(0.5, Math.min(2, baseRate * emotionalRateMod * rateVariation));
+            this.utterance.pitch = Math.max(0.5, Math.min(2, basePitch * emotionalPitchMod * pitchVariation));
             this.utterance.volume = options?.volume ?? 1;
             this.utterance.lang = voice.language === "hi" ? "hi-IN" : "en-US";
 
@@ -145,7 +221,9 @@ export class TTSEngine {
                 // Cancel any ongoing speech
                 this.synth.cancel();
 
-                this.utterance = new SpeechSynthesisUtterance(text);
+                const emotion = this.detectEmotion(text);
+                const processedText = this.processTextForNaturalSpeech(text);
+                this.utterance = new SpeechSynthesisUtterance(processedText);
 
                 // Find matching voice
                 const matchingVoice = this.findMatchingVoice(voice);
@@ -153,9 +231,35 @@ export class TTSEngine {
                     this.utterance.voice = matchingVoice;
                 }
 
-                // Set voice parameters
-                this.utterance.rate = options?.rate ?? voice.rate ?? 1;
-                this.utterance.pitch = options?.pitch ?? voice.pitch ?? 1;
+                const baseRate = options?.rate ?? voice.rate ?? 1;
+                const basePitch = options?.pitch ?? voice.pitch ?? 1;
+
+                let emotionalRateMod = 1.0;
+                let emotionalPitchMod = 1.0;
+
+                switch (emotion.type) {
+                    case "excited":
+                        emotionalRateMod = 1.08 + emotion.intensity * 0.02;
+                        emotionalPitchMod = 1.1 + emotion.intensity * 0.02;
+                        break;
+                    case "curious":
+                        emotionalRateMod = 0.98;
+                        emotionalPitchMod = 1.08;
+                        break;
+                    case "expressive":
+                        emotionalRateMod = 1.03;
+                        emotionalPitchMod = 1.05;
+                        break;
+                    default:
+                        emotionalRateMod = 1.0;
+                        emotionalPitchMod = 1.0;
+                }
+
+                const rateVariation = 1 + (Math.random() * 0.06 - 0.03);
+                const pitchVariation = 1 + (Math.random() * 0.04 - 0.02);
+
+                this.utterance.rate = Math.max(0.5, Math.min(2, baseRate * emotionalRateMod * rateVariation));
+                this.utterance.pitch = Math.max(0.5, Math.min(2, basePitch * emotionalPitchMod * pitchVariation));
                 this.utterance.volume = options?.volume ?? 1;
                 this.utterance.lang = voice.language === "hi" ? "hi-IN" : "en-US";
 

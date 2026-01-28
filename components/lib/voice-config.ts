@@ -31,8 +31,8 @@ export const voices: Voice[] = [
             hi: "",
         },
         webSpeechVoice: "Google US English",
-        pitch: 1,
-        rate: 1,
+        pitch: 0.95,
+        rate: 0.95,
     },
     {
         id: "en-male-2",
@@ -47,8 +47,8 @@ export const voices: Voice[] = [
             hi: "",
         },
         webSpeechVoice: "Google UK English Male",
-        pitch: 1.1,
-        rate: 1.1,
+        pitch: 1.05,
+        rate: 1.0,
     },
     {
         id: "en-female-1",
@@ -63,8 +63,8 @@ export const voices: Voice[] = [
             hi: "",
         },
         webSpeechVoice: "Google US English",
-        pitch: 1.3,
-        rate: 1,
+        pitch: 1.15,
+        rate: 0.95,
     },
     {
         id: "en-female-2",
@@ -79,8 +79,8 @@ export const voices: Voice[] = [
             hi: "",
         },
         webSpeechVoice: "Google UK English Female",
-        pitch: 1.2,
-        rate: 0.9,
+        pitch: 1.1,
+        rate: 0.88,
     },
 
     // Hindi Voices
@@ -97,8 +97,8 @@ export const voices: Voice[] = [
             hi: "नमस्ते, मैं अर्जुन हूं। मैं आपकी मदद कर सकता हूं।",
         },
         webSpeechVoice: "Google हिन्दी",
-        pitch: 1,
-        rate: 0.9,
+        pitch: 0.92,
+        rate: 0.85,
     },
     {
         id: "hi-male-2",
@@ -113,8 +113,8 @@ export const voices: Voice[] = [
             hi: "हेलो दोस्तों! मैं राज हूं और मैं यहां आपकी मदद के लिए हूं!",
         },
         webSpeechVoice: "Google हिन्दी",
-        pitch: 1.1,
-        rate: 1,
+        pitch: 1.0,
+        rate: 0.9,
     },
     {
         id: "hi-female-1",
@@ -129,8 +129,8 @@ export const voices: Voice[] = [
             hi: "नमस्ते! मैं प्रिया हूं। आपके शब्दों को जीवंत बनाने में मदद करूंगी।",
         },
         webSpeechVoice: "Google हिन्दी",
-        pitch: 1.3,
-        rate: 0.9,
+        pitch: 1.12,
+        rate: 0.85,
     },
     {
         id: "hi-female-2",
@@ -145,8 +145,8 @@ export const voices: Voice[] = [
             hi: "स्वागत है। मैं अंजलि हूं, आपकी शांत आवाज़ सहायक।",
         },
         webSpeechVoice: "Google हिन्दी",
-        pitch: 1.2,
-        rate: 0.85,
+        pitch: 1.08,
+        rate: 0.82,
     },
 ];
 
