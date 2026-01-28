@@ -22,6 +22,7 @@ export default function StudioPage() {
     const [text, setText] = useState("");
     const [selectedVoice, setSelectedVoice] = useState<Voice>(voices[0]);
     const [language, setLanguage] = useState<"en" | "hi">("en");
+    const [category, setCategory] = useState<"all" | "science" | "history" | "story">("all");
     const [isPlaying, setIsPlaying] = useState(false);
     const [speed, setSpeed] = useState(1);
     const [pitch, setPitch] = useState(1);
@@ -46,12 +47,16 @@ export default function StudioPage() {
     }, []);
 
     useEffect(() => {
-        const filtered = allVoices.filter((v) => v.language === language || v.language === "both");
+        const filtered = allVoices.filter((v) => {
+            const matchesLanguage = v.language === language || v.language === "both";
+            const matchesCategory = category === "all" ? true : v.category === category;
+            return matchesLanguage && matchesCategory;
+        });
         setFilteredVoices(filtered);
         if (filtered.length > 0 && selectedVoice.language !== language && selectedVoice.language !== "both") {
             setSelectedVoice(filtered[0]);
         }
-    }, [language, selectedVoice, allVoices]);
+    }, [language, category, selectedVoice, allVoices]);
 
     const handleSpeak = async () => {
         if (!text.trim()) {
@@ -280,6 +285,52 @@ export default function StudioPage() {
                                             }`}
                                     >
                                         हिंदी (Hindi)
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Category Selector */}
+                            <div className="glass-card">
+                                <div className="flex items-center space-x-2 mb-4">
+                                    <Sparkles className="w-5 h-5 text-purple-400" />
+                                    <h3 className="font-semibold">Category</h3>
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <button
+                                        onClick={() => setCategory("all")}
+                                        className={`py-3 rounded-xl font-semibold transition-all ${category === "all"
+                                            ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white"
+                                            : "glass hover:bg-white/10"
+                                            }`}
+                                    >
+                                        All
+                                    </button>
+                                    <button
+                                        onClick={() => setCategory("science")}
+                                        className={`py-3 rounded-xl font-semibold transition-all ${category === "science"
+                                            ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white"
+                                            : "glass hover:bg-white/10"
+                                            }`}
+                                    >
+                                        Science
+                                    </button>
+                                    <button
+                                        onClick={() => setCategory("history")}
+                                        className={`py-3 rounded-xl font-semibold transition-all ${category === "history"
+                                            ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white"
+                                            : "glass hover:bg-white/10"
+                                            }`}
+                                    >
+                                        History
+                                    </button>
+                                    <button
+                                        onClick={() => setCategory("story")}
+                                        className={`py-3 rounded-xl font-semibold transition-all ${category === "story"
+                                            ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white"
+                                            : "glass hover:bg-white/10"
+                                            }`}
+                                    >
+                                        Story
                                     </button>
                                 </div>
                             </div>

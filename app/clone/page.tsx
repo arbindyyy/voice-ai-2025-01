@@ -126,6 +126,7 @@ export default function ClonePage() {
                     const newVoice: Voice = {
                         id: `custom-${Date.now()}`,
                         name: voiceName.trim(),
+                        category: "custom",
                         language: voiceLanguage,
                         gender: voiceGender,
                         age: "middle",
