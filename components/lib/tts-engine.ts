@@ -9,6 +9,7 @@ export class TTSEngine {
     private mediaStreamDestination: MediaStreamAudioDestinationNode | null = null;
     private mediaRecorder: MediaRecorder | null = null;
     private audioChunks: Blob[] = [];
+    private recordingMimeType: string | null = null;
 
     constructor() {
         if (typeof window !== "undefined") {
@@ -44,10 +45,20 @@ export class TTSEngine {
         this.mediaStreamDestination = this.audioContext.createMediaStreamDestination();
 
         // Create media recorder
-        this.mediaRecorder = new MediaRecorder(this.mediaStreamDestination.stream, {
-            mimeType: 'audio/webm;codecs=opus',
+        const preferredTypes = [
+            "audio/ogg;codecs=opus",
+            "audio/webm;codecs=opus",
+            "audio/webm",
+        ];
+        const supportedType = preferredTypes.find((type) => MediaRecorder.isTypeSupported(type));
+        this.recordingMimeType = supportedType ?? null;
+        const options: MediaRecorderOptions = {
             audioBitsPerSecond: 256000, // Higher quality
-        });
+        };
+        if (this.recordingMimeType) {
+            options.mimeType = this.recordingMimeType;
+        }
+        this.mediaRecorder = new MediaRecorder(this.mediaStreamDestination.stream, options);
 
         this.audioChunks = [];
 
@@ -274,7 +285,8 @@ export class TTSEngine {
                         this.mediaRecorder.stop();
 
                         this.mediaRecorder.onstop = () => {
-                            const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+                            const mimeType = this.recordingMimeType ?? "audio/webm";
+                            const audioBlob = new Blob(this.audioChunks, { type: mimeType });
                             options?.onEnd?.();
                             resolve(audioBlob);
                         };

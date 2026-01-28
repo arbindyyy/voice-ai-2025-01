@@ -9,6 +9,7 @@ export class TTSEngine {
     private mediaStreamDestination: MediaStreamAudioDestinationNode | null = null;
     private mediaRecorder: MediaRecorder | null = null;
     private audioChunks: Blob[] = [];
+    private recordingMimeType: string | null = null;
 
     constructor() {
         if (typeof window !== "undefined") {
@@ -36,10 +37,20 @@ export class TTSEngine {
         if (typeof window === "undefined") return;
         this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
         this.mediaStreamDestination = this.audioContext.createMediaStreamDestination();
-        this.mediaRecorder = new MediaRecorder(this.mediaStreamDestination.stream, {
-            mimeType: 'audio/webm;codecs=opus',
+        const preferredTypes = [
+            "audio/ogg;codecs=opus",
+            "audio/webm;codecs=opus",
+            "audio/webm",
+        ];
+        const supportedType = preferredTypes.find((type) => MediaRecorder.isTypeSupported(type));
+        this.recordingMimeType = supportedType ?? null;
+        const options: MediaRecorderOptions = {
             audioBitsPerSecond: 256000,
-        });
+        };
+        if (this.recordingMimeType) {
+            options.mimeType = this.recordingMimeType;
+        }
+        this.mediaRecorder = new MediaRecorder(this.mediaStreamDestination.stream, options);
         this.audioChunks = [];
         this.mediaRecorder.ondataavailable = (event) => {
             if (event.data.size > 0) {
@@ -238,7 +249,8 @@ export class TTSEngine {
                     if (this.mediaRecorder && this.mediaRecorder.state === "recording") {
                         this.mediaRecorder.stop();
                         this.mediaRecorder.onstop = () => {
-                            const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+                            const mimeType = this.recordingMimeType ?? "audio/webm";
+                            const audioBlob = new Blob(this.audioChunks, { type: mimeType });
                             options?.onEnd?.();
                             resolve(audioBlob);
                         };

@@ -90,7 +90,7 @@ export default function StudioPage() {
         }
     };
 
-    const handleDownload = async (format: 'webm' | 'wav' | 'mp3' = 'webm') => {
+    const handleDownload = async (format: 'webm' | 'wav' | 'mp3' = 'wav') => {
         if (!text.trim()) {
             alert("Please enter some text first!");
             return;
@@ -115,7 +115,7 @@ export default function StudioPage() {
             });
 
             let finalBlob = audioBlob;
-            let extension = 'webm';
+            let extension = audioBlob.type.includes("ogg") ? "ogg" : "webm";
 
             // Convert to WAV if requested
             if (format === 'wav' || format === 'mp3') {
@@ -128,8 +128,8 @@ export default function StudioPage() {
                     extension = 'wav';
                 } catch (conversionError) {
                     console.error('Conversion error:', conversionError);
-                    alert(`Could not convert to ${format.toUpperCase()}. Downloading as WebM instead.`);
-                    extension = 'webm';
+                    alert(`Could not convert to ${format.toUpperCase()}. Downloading as audio instead.`);
+                    extension = audioBlob.type.includes("ogg") ? "ogg" : "webm";
                 }
             }
 
@@ -468,16 +468,16 @@ export default function StudioPage() {
                                         {showDownloadMenu && (
                                             <div className="absolute bottom-full left-0 mb-2 w-full glass rounded-xl p-2 space-y-1 z-10">
                                                 <button
-                                                    onClick={() => handleDownload('webm')}
-                                                    className="w-full px-3 py-2 text-sm hover:bg-white/10 rounded-lg text-left"
-                                                >
-                                                    WebM (Default)
-                                                </button>
-                                                <button
                                                     onClick={() => handleDownload('wav')}
                                                     className="w-full px-3 py-2 text-sm hover:bg-white/10 rounded-lg text-left"
                                                 >
                                                     WAV (High Quality)
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDownload('webm')}
+                                                    className="w-full px-3 py-2 text-sm hover:bg-white/10 rounded-lg text-left"
+                                                >
+                                                    Audio (OGG/WebM)
                                                 </button>
                                                 <button
                                                     onClick={() => handleDownload('mp3')}
