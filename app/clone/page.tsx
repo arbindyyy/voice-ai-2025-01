@@ -14,7 +14,7 @@ import {
     AlertCircle,
     Loader2,
 } from "lucide-react";
-import { validateAudioFile, getAudioDuration, formatDuration } from "@/lib/audio-utils";
+import { validateAudioFile, getAudioDuration, formatDuration, analyzeAudioForCloning, extractVoiceFeatures } from "@/lib/audio-utils";
 import { Voice } from "@/lib/voice-config";
 
 interface UploadedFile {
@@ -34,6 +34,7 @@ export default function ClonePage() {
     const [trainingProgress, setTrainingProgress] = useState(0);
     const [isComplete, setIsComplete] = useState(false);
     const [dragActive, setDragActive] = useState(false);
+    const [voiceQuality, setVoiceQuality] = useState<string>("");
 
     const customVoiceKey = "voiceCreator.customVoices";
 
@@ -85,12 +86,27 @@ export default function ClonePage() {
                 const duration = await getAudioDuration(file);
                 const url = URL.createObjectURL(file);
                 validFiles.push({ file, url, duration });
+                
+                // Analyze voice quality
+                const profile = await analyzeAudioForCloning(file);
+                console.log(`Voice profile for ${file.name}:`, profile);
             } catch (error) {
                 alert(`Error loading ${file.name}`);
             }
         }
 
-        setUploadedFiles([...uploadedFiles, ...validFiles]);
+        const newFiles = [...uploadedFiles, ...validFiles];
+        setUploadedFiles(newFiles);
+        
+        // Update voice quality assessment
+        if (newFiles.length > 0) {
+            try {
+                const features = await extractVoiceFeatures(newFiles.map(f => f.file));
+                setVoiceQuality(features.averageQuality);
+            } catch (error) {
+                console.error('Error analyzing voice features:', error);
+            }
+        }
     };
 
     const removeFile = (index: number) => {
@@ -242,12 +258,14 @@ export default function ClonePage() {
                                     <div className="flex items-start space-x-3">
                                         <AlertCircle className="w-5 h-5 text-blue-400 mt-0.5" />
                                         <div className="text-sm text-gray-300">
-                                            <p className="font-semibold mb-1">Requirements:</p>
+                                            <p className="font-semibold mb-1">Voice Cloning Requirements:</p>
                                             <ul className="list-disc list-inside space-y-1 text-gray-400">
-                                                <li>Upload 1-5 audio files of your voice</li>
-                                                <li>Minimum 30 seconds, recommended 3-5 minutes total</li>
-                                                <li>Clear audio without background noise</li>
-                                                <li>Supported formats: WAV, MP3, OGG</li>
+                                                <li>Upload 1-5 high-quality audio files</li>
+                                                <li>File size: 1MB to 100MB per file (larger files = better quality)</li>
+                                                <li>Duration: Minimum 30 seconds, recommended 3-5 minutes total</li>
+                                                <li>Clear audio without background noise for best results</li>
+                                                <li>Supported formats: WAV, MP3, OGG, WEBM</li>
+                                                <li>💡 Tip: Files over 50MB will produce highest quality clones</li>
                                             </ul>
                                         </div>
                                     </div>
@@ -284,12 +302,19 @@ export default function ClonePage() {
                                 {/* Uploaded Files */}
                                 {uploadedFiles.length > 0 && (
                                     <div className="mt-6 space-y-3">
-                                        <h4 className="font-semibold flex items-center justify-between">
-                                            <span>Uploaded Files ({uploadedFiles.length})</span>
+                                        <div className="flex items-center justify-between mb-3">
+                                            <h4 className="font-semibold flex items-center space-x-2">
+                                                <span>Uploaded Files ({uploadedFiles.length})</span>
+                                                {voiceQuality && (
+                                                    <span className="text-xs px-2 py-1 bg-purple-500/20 text-purple-300 rounded-full">
+                                                        {voiceQuality}
+                                                    </span>
+                                                )}
+                                            </h4>
                                             <span className="text-sm text-gray-400">
                                                 Total: {formatDuration(totalDuration)}
                                             </span>
-                                        </h4>
+                                        </div>
                                         {uploadedFiles.map((file, index) => (
                                             <div
                                                 key={index}
@@ -302,6 +327,9 @@ export default function ClonePage() {
                                                         <p className="text-sm text-gray-400">
                                                             {formatDuration(file.duration)} •{" "}
                                                             {(file.file.size / 1024 / 1024).toFixed(2)} MB
+                                                            {file.file.size > 50 * 1024 * 1024 && (
+                                                                <span className="ml-2 text-green-400">• Premium Quality</span>
+                                                            )}
                                                         </p>
                                                     </div>
                                                 </div>

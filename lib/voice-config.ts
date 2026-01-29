@@ -394,3 +394,7 @@ export const getVoicesByLanguage = (language: "en" | "hi"): Voice[] => {
 export const getVoicesByGender = (gender: "male" | "female"): Voice[] => {
     return voices.filter((v) => v.gender === gender);
 };
+
+export const getVoices = (): Voice[] => {
+    return voices;
+};

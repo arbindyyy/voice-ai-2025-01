@@ -12,10 +12,15 @@ import {
     Settings,
     ArrowLeft,
     Sparkles,
-    Languages
+    Languages,
+    Smile,
+    Frown,
+    Zap,
+    Heart,
+    Wind,
 } from "lucide-react";
 import { voices, Voice } from "@/lib/voice-config";
-import { getTTSEngine } from "@/lib/tts-engine";
+import { getTTSEngine, EmotionType } from "@/lib/tts-engine";
 import { downloadAudio } from "@/lib/audio-utils";
 
 export default function StudioPage() {
@@ -26,6 +31,8 @@ export default function StudioPage() {
     const [isPlaying, setIsPlaying] = useState(false);
     const [speed, setSpeed] = useState(1);
     const [pitch, setPitch] = useState(1);
+    const [emotion, setEmotion] = useState<EmotionType>("neutral");
+    const [emotionIntensity, setEmotionIntensity] = useState(50);
     const [showSettings, setShowSettings] = useState(false);
     const [filteredVoices, setFilteredVoices] = useState<Voice[]>([]);
     const [customVoices, setCustomVoices] = useState<Voice[]>([]);
@@ -78,6 +85,8 @@ export default function StudioPage() {
             await tts.speak(text, selectedVoice, {
                 rate: speed,
                 pitch: pitch,
+                emotion: emotion,
+                emotionIntensity: emotionIntensity,
                 onEnd: () => setIsPlaying(false),
                 onError: () => {
                     setIsPlaying(false);
@@ -107,6 +116,8 @@ export default function StudioPage() {
             const audioBlob = await tts.speakAndRecord(text, selectedVoice, {
                 rate: speed,
                 pitch: pitch,
+                emotion: emotion,
+                emotionIntensity: emotionIntensity,
                 onEnd: () => setIsPlaying(false),
                 onError: () => {
                     setIsPlaying(false);
@@ -403,6 +414,97 @@ export default function StudioPage() {
 
                                 {showSettings && (
                                     <div className="mb-6 space-y-4 p-4 glass rounded-xl">
+                                        {/* Emotion Selector */}
+                                        <div>
+                                            <label className="text-sm text-gray-400 mb-2 block">
+                                                Emotion
+                                            </label>
+                                            <div className="grid grid-cols-5 gap-2">
+                                                <button
+                                                    onClick={() => setEmotion("neutral")}
+                                                    className={`p-3 rounded-lg transition-all flex flex-col items-center ${
+                                                        emotion === "neutral"
+                                                            ? "bg-gradient-to-br from-purple-600 to-blue-600 text-white"
+                                                            : "glass hover:bg-white/10"
+                                                    }`}
+                                                    title="Neutral"
+                                                >
+                                                    <Wind className="w-5 h-5 mb-1" />
+                                                    <span className="text-xs">Neutral</span>
+                                                </button>
+                                                <button
+                                                    onClick={() => setEmotion("happy")}
+                                                    className={`p-3 rounded-lg transition-all flex flex-col items-center ${
+                                                        emotion === "happy"
+                                                            ? "bg-gradient-to-br from-purple-600 to-blue-600 text-white"
+                                                            : "glass hover:bg-white/10"
+                                                    }`}
+                                                    title="Happy"
+                                                >
+                                                    <Smile className="w-5 h-5 mb-1" />
+                                                    <span className="text-xs">Happy</span>
+                                                </button>
+                                                <button
+                                                    onClick={() => setEmotion("sad")}
+                                                    className={`p-3 rounded-lg transition-all flex flex-col items-center ${
+                                                        emotion === "sad"
+                                                            ? "bg-gradient-to-br from-purple-600 to-blue-600 text-white"
+                                                            : "glass hover:bg-white/10"
+                                                    }`}
+                                                    title="Sad"
+                                                >
+                                                    <Frown className="w-5 h-5 mb-1" />
+                                                    <span className="text-xs">Sad</span>
+                                                </button>
+                                                <button
+                                                    onClick={() => setEmotion("angry")}
+                                                    className={`p-3 rounded-lg transition-all flex flex-col items-center ${
+                                                        emotion === "angry"
+                                                            ? "bg-gradient-to-br from-purple-600 to-blue-600 text-white"
+                                                            : "glass hover:bg-white/10"
+                                                    }`}
+                                                    title="Angry"
+                                                >
+                                                    <Zap className="w-5 h-5 mb-1" />
+                                                    <span className="text-xs">Angry</span>
+                                                </button>
+                                                <button
+                                                    onClick={() => setEmotion("excited")}
+                                                    className={`p-3 rounded-lg transition-all flex flex-col items-center ${
+                                                        emotion === "excited"
+                                                            ? "bg-gradient-to-br from-purple-600 to-blue-600 text-white"
+                                                            : "glass hover:bg-white/10"
+                                                    }`}
+                                                    title="Excited"
+                                                >
+                                                    <Heart className="w-5 h-5 mb-1" />
+                                                    <span className="text-xs">Excited</span>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Emotion Intensity */}
+                                        <div>
+                                            <label className="text-sm text-gray-400 mb-2 block">
+                                                Emotion Intensity: {emotionIntensity}%
+                                            </label>
+                                            <input
+                                                type="range"
+                                                min="0"
+                                                max="100"
+                                                step="5"
+                                                value={emotionIntensity}
+                                                onChange={(e) => setEmotionIntensity(parseInt(e.target.value))}
+                                                className="w-full accent-purple-500"
+                                            />
+                                            <div className="flex justify-between text-xs text-gray-500 mt-1">
+                                                <span>Subtle</span>
+                                                <span>Moderate</span>
+                                                <span>Strong</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Speed Control */}
                                         <div>
                                             <label className="text-sm text-gray-400 mb-2 block">
                                                 Speed: {speed.toFixed(1)}x
@@ -417,6 +519,8 @@ export default function StudioPage() {
                                                 className="w-full accent-purple-500"
                                             />
                                         </div>
+
+                                        {/* Pitch Control */}
                                         <div>
                                             <label className="text-sm text-gray-400 mb-2 block">
                                                 Pitch: {pitch.toFixed(1)}
@@ -541,6 +645,54 @@ export default function StudioPage() {
                                             View All Voices
                                         </button>
                                     </Link>
+                                </div>
+                            </div>
+
+                            {/* Emotion Guide */}
+                            <div className="glass-card mt-6">
+                                <h3 className="font-semibold mb-3 flex items-center">
+                                    <Sparkles className="w-5 h-5 text-purple-400 mr-2" />
+                                    Emotion Guide
+                                </h3>
+                                <div className="space-y-3 text-sm">
+                                    <div className="flex items-start space-x-3">
+                                        <Wind className="w-5 h-5 text-gray-400 mt-0.5" />
+                                        <div>
+                                            <p className="font-semibold text-gray-300">Neutral</p>
+                                            <p className="text-gray-500 text-xs">Standard delivery, balanced tone</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start space-x-3">
+                                        <Smile className="w-5 h-5 text-yellow-400 mt-0.5" />
+                                        <div>
+                                            <p className="font-semibold text-gray-300">Happy</p>
+                                            <p className="text-gray-500 text-xs">Upbeat, positive, energetic</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start space-x-3">
+                                        <Frown className="w-5 h-5 text-blue-400 mt-0.5" />
+                                        <div>
+                                            <p className="font-semibold text-gray-300">Sad</p>
+                                            <p className="text-gray-500 text-xs">Slower, lower pitch, softer</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start space-x-3">
+                                        <Zap className="w-5 h-5 text-red-400 mt-0.5" />
+                                        <div>
+                                            <p className="font-semibold text-gray-300">Angry</p>
+                                            <p className="text-gray-500 text-xs">Intense, sharp, forceful</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start space-x-3">
+                                        <Heart className="w-5 h-5 text-pink-400 mt-0.5" />
+                                        <div>
+                                            <p className="font-semibold text-gray-300">Excited</p>
+                                            <p className="text-gray-500 text-xs">Fast, high energy, enthusiastic</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="mt-4 p-3 bg-purple-500/10 rounded-lg text-xs text-gray-400">
+                                    💡 Tip: Adjust intensity slider to control emotion strength (0-100%)
                                 </div>
                             </div>
                         </div>

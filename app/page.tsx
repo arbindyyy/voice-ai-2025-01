@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Mic2, Sparkles, Languages, UserCircle, ArrowRight, Volume2, Wand2 } from "lucide-react";
+import { Mic2, Sparkles, Languages, UserCircle, ArrowRight, Volume2, Wand2, Users, Code, Layers, Zap, Palette, Radio, BarChart3, Activity, GitCompare } from "lucide-react";
 
 export default function HomePage() {
     return (
@@ -29,8 +29,35 @@ export default function HomePage() {
                             <Link href="/voices" className="text-gray-300 hover:text-white transition-colors">
                                 Voices
                             </Link>
+                            <Link href="/dialogue" className="text-gray-300 hover:text-white transition-colors">
+                                Dialogue
+                            </Link>
+                            <Link href="/batch" className="text-gray-300 hover:text-white transition-colors">
+                                Batch
+                            </Link>
+                            <Link href="/effects" className="text-gray-300 hover:text-white transition-colors">
+                                Effects
+                            </Link>
+                            <Link href="/style" className="text-gray-300 hover:text-white transition-colors">
+                                Style
+                            </Link>
+                            <Link href="/realtime" className="text-gray-300 hover:text-white transition-colors">
+                                Live
+                            </Link>
+                            <Link href="/ssml" className="text-gray-300 hover:text-white transition-colors">
+                                SSML
+                            </Link>
+                            <Link href="/analytics" className="text-gray-300 hover:text-white transition-colors">
+                                Analytics
+                            </Link>
+                            <Link href="/enhance" className="text-gray-300 hover:text-white transition-colors">
+                                Enhance
+                            </Link>
+                            <Link href="/compare" className="text-gray-300 hover:text-white transition-colors">
+                                Compare
+                            </Link>
                             <Link href="/clone" className="text-gray-300 hover:text-white transition-colors">
-                                Clone Voice
+                                Clone
                             </Link>
                         </div>
                         <Link href="/studio">
@@ -131,7 +158,7 @@ export default function HomePage() {
                         </p>
                     </motion.div>
 
-                    <div className="grid md:grid-cols-3 gap-8">
+                    <div className="grid md:grid-cols-3 gap-6">
                         {/* Feature 1 */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -181,6 +208,165 @@ export default function HomePage() {
                             <p className="text-gray-400">
                                 Clone any voice by uploading audio samples. Create custom voices that sound just like you.
                             </p>
+                        </motion.div>
+
+                        {/* Feature 4 - New */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, delay: 0.4 }}
+                            viewport={{ once: true }}
+                            className="voice-card"
+                        >
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center mb-4">
+                                <Users className="w-6 h-6 text-white" />
+                            </div>
+                            <h3 className="text-2xl font-bold mb-3">Multi-Voice Dialogue</h3>
+                            <p className="text-gray-400">
+                                Create conversations with multiple voices. Perfect for podcasts, stories, and educational content.
+                            </p>
+                        </motion.div>
+
+                        {/* Feature 5 - SSML Editor */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, delay: 0.5 }}
+                            viewport={{ once: true }}
+                            className="voice-card"
+                        >
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center mb-4">
+                                <Code className="w-6 h-6 text-white" />
+                            </div>
+                            <h3 className="text-2xl font-bold mb-3">SSML Editor</h3>
+                            <p className="text-gray-400">
+                                Advanced speech control with SSML. Fine-tune pronunciation, pauses, emphasis, and more.
+                            </p>
+                        </motion.div>
+
+                        {/* Feature 6 - Batch Processing */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, delay: 0.6 }}
+                            viewport={{ once: true }}
+                            className="voice-card"
+                        >
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center mb-4">
+                                <Layers className="w-6 h-6 text-white" />
+                            </div>
+                            <h3 className="text-2xl font-bold mb-3">Batch Processing</h3>
+                            <p className="text-gray-400">
+                                Process hundreds of texts at once. Upload CSV files and generate multiple audio files.
+                            </p>
+                        </motion.div>
+
+                        {/* Feature 7 - Audio Effects */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, delay: 0.7 }}
+                            viewport={{ once: true }}
+                            className="voice-card"
+                        >
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center mb-4">
+                                <Zap className="w-6 h-6 text-white" />
+                            </div>
+                            <h3 className="text-2xl font-bold mb-3">Audio Effects</h3>
+                            <p className="text-gray-400">
+                                Transform your voice with professional effects. Reverb, echo, filters, and more.
+                            </p>
+                        </motion.div>
+
+                        {/* Feature 8 - Voice Style Transfer */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, delay: 0.8 }}
+                            viewport={{ once: true }}
+                            className="voice-card"
+                        >
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center mb-4">
+                                <Palette className="w-6 h-6 text-white" />
+                            </div>
+                            <h3 className="text-2xl font-bold mb-3">Style Transfer</h3>
+                            <p className="text-gray-400">
+                                Change voice characteristics. Robot, child, elderly, and 17+ style presets.
+                            </p>
+                        </motion.div>
+
+                        {/* Feature 9 - Real-Time Morphing */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, delay: 0.9 }}
+                            viewport={{ once: true }}
+                            className="voice-card"
+                        >
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center mb-4">
+                                <Radio className="w-6 h-6 text-white" />
+                            </div>
+                            <h3 className="text-2xl font-bold mb-3">Live Morphing</h3>
+                            <p className="text-gray-400">
+                                Real-time voice transformation. Speak and hear effects instantly with live processing.
+                            </p>
+                        </motion.div>
+
+                        {/* Feature 10 - Voice Analytics */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, delay: 1.0 }}
+                            viewport={{ once: true }}
+                            className="voice-card"
+                        >
+                            <Link href="/analytics" className="block">
+                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mb-4">
+                                    <BarChart3 className="w-6 h-6 text-white" />
+                                </div>
+                                <h3 className="text-2xl font-bold mb-3">Voice Analytics</h3>
+                                <p className="text-gray-400">
+                                    Professional audio analysis. Quality metrics, emotion detection, speaker profiling, and insights.
+                                </p>
+                            </Link>
+                        </motion.div>
+
+                        {/* Feature 11 - Audio Enhancement */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, delay: 1.1 }}
+                            viewport={{ once: true }}
+                            className="voice-card"
+                        >
+                            <Link href="/enhance" className="block">
+                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center mb-4">
+                                    <Activity className="w-6 h-6 text-white" />
+                                </div>
+                                <h3 className="text-2xl font-bold mb-3">Audio Enhancement</h3>
+                                <p className="text-gray-400">
+                                    Professional noise reduction, de-esser, breath removal, and audio restoration tools.
+                                </p>
+                            </Link>
+                        </motion.div>
+
+                        {/* Feature 12 - Voice Comparison */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, delay: 1.2 }}
+                            viewport={{ once: true }}
+                            className="voice-card"
+                        >
+                            <Link href="/compare" className="block">
+                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center mb-4">
+                                    <GitCompare className="w-6 h-6 text-white" />
+                                </div>
+                                <h3 className="text-2xl font-bold mb-3">Voice Comparison</h3>
+                                <p className="text-gray-400">
+                                    Side-by-side A/B testing, quality comparison, preference scoring, and detailed analysis.
+                                </p>
+                            </Link>
                         </motion.div>
                     </div>
                 </div>
